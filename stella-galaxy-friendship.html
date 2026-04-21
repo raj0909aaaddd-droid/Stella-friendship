@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Stella — A Universe of Friendship</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,600&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #f0c060;
+    --rose: #ff6eb4;
+    --violet: #b066ff;
+    --cyan: #00e5ff;
+    --white: #ffffff;
+    --cream: #fff8f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #00000f;
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CURSOR */
+  #cursor {
+    position: fixed;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #f0c060, #ff6eb4);
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: screen;
+    transition: transform 0.1s ease;
+    box-shadow: 0 0 20px 8px rgba(240,192,96,0.5);
+  }
+  #cursor-trail {
+    position: fixed;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(176, 102, 255, 0.5);
+    pointer-events: none;
+    z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: left 0.15s ease, top 0.15s ease;
+  }
+
+  /* CANVAS — GALAXY BACKGROUND */
+  #galaxy-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* NEBULA LAYERS */
+  .nebula-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    animation: nebulaDrift 40s ease-in-out infinite alternate;
+  }
+  @keyframes nebulaDrift {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(30px, 20px) scale(1.05); }
+  }
+
+  /* MAIN WRAPPER */
+  #main-wrap {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* === HERO SECTION === */
+  #hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 2rem;
+  }
+
+  .hero-orbit-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(240,192,96,0.15);
+    animation: orbitSpin linear infinite;
+    pointer-events: none;
+  }
+  @keyframes orbitSpin {
+    from { transform: translate(-50%,-50%) rotate(0deg); }
+    to   { transform: translate(-50%,-50%) rotate(360deg); }
+  }
+
+  .orbit-dot {
+    position: absolute;
+    top: -4px; left: 50%;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 12px 4px currentColor;
+  }
+
+  .hero-tagline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(11px, 1.5vw, 14px);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: rgba(240,192,96,0.7);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease 0.5s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(72px, 12vw, 160px);
+    font-weight: 900;
+    line-height: 0.9;
+    text-align: center;
+    background: linear-gradient(135deg, #fff8e7 0%, #f0c060 30%, #ff6eb4 60%, #b066ff 85%, #00e5ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 60px rgba(240,192,96,0.3));
+    opacity: 0;
+    animation: fadeUp 1.4s ease 0.8s forwards, titlePulse 4s ease-in-out 2.2s infinite alternate;
+    position: relative;
+    z-index: 2;
+  }
+  @keyframes titlePulse {
+    0% { filter: drop-shadow(0 0 40px rgba(240,192,96,0.3)); }
+    100% { filter: drop-shadow(0 0 80px rgba(255,110,180,0.5)); }
+  }
+
+  .hero-subtitle {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 3vw, 32px);
+    font-style: italic;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    margin-top: 1.5rem;
+    letter-spacing: 1px;
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 1.4s ease 1.2s forwards;
+  }
+
+  .hero-cta {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 1.4s ease 1.6s forwards;
+  }
+
+  .btn-stardust {
+    padding: 1rem 2.5rem;
+    border-radius: 100px;
+    border: 1px solid rgba(240,192,96,0.4);
+    background: rgba(240,192,96,0.08);
+    color: #f0c060;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(8px);
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-stardust::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(240,192,96,0.15), rgba(255,110,180,0.15));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 100px;
+  }
+  .btn-stardust:hover { border-color: rgba(240,192,96,0.8); box-shadow: 0 0 40px rgba(240,192,96,0.3); transform: translateY(-3px); }
+  .btn-stardust:hover::before { opacity: 1; }
+
+  .btn-void {
+    padding: 1rem 2.5rem;
+    border-radius: 100px;
+    border: 1px solid rgba(176,102,255,0.4);
+    background: rgba(176,102,255,0.08);
+    color: #b066ff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.4s ease;
+    backdrop-filter: blur(8px);
+  }
+  .btn-void:hover { border-color: rgba(176,102,255,0.8); box-shadow: 0 0 40px rgba(176,102,255,0.3); transform: translateY(-3px); }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 3rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 2.5s forwards;
+  }
+  .scroll-hint span {
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: rgba(255,255,255,0.3);
+    text-transform: uppercase;
+  }
+  .scroll-arrow {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, rgba(240,192,96,0.6), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%,100% { opacity: 0.4; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.3); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(40px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === JOURNEY SECTION — SCROLL 3D WORDS === */
+  #journey {
+    position: relative;
+    padding: 0;
+  }
+
+  .journey-station {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 2rem;
+  }
+
+  .station-bg {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .station-inner {
+    text-align: center;
+    max-width: 900px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .planet-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    opacity: 0.5;
+  }
+
+  .station-word-3d {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(60px, 11vw, 130px);
+    font-weight: 900;
+    line-height: 1;
+    margin: 0 auto 2rem;
+    opacity: 0;
+    transform: perspective(800px) translateZ(-200px) rotateX(25deg);
+    transition: opacity 1.2s cubic-bezier(0.16,1,0.3,1), transform 1.2s cubic-bezier(0.16,1,0.3,1);
+    will-change: transform, opacity;
+    display: block;
+  }
+  .station-word-3d.in-view {
+    opacity: 1;
+    transform: perspective(800px) translateZ(0) rotateX(0deg);
+  }
+  .station-word-3d.past-view {
+    opacity: 0;
+    transform: perspective(800px) translateZ(100px) rotateX(-15deg);
+  }
+
+  .station-desc {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-style: italic;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.65);
+    max-width: 600px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 1s ease 0.3s, transform 1s ease 0.3s;
+  }
+  .station-desc.in-view { opacity: 1; transform: translateY(0); }
+
+  .station-poem {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(15px, 2vw, 21px);
+    line-height: 2;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 1s ease 0.6s, transform 1s ease 0.6s;
+  }
+  .station-poem.in-view { opacity: 1; transform: translateY(0); }
+
+  /* Destination-specific gradients */
+  .dest-mercury .station-word-3d { background: linear-gradient(135deg, #c4a882, #ff9a3c, #ffe0b2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-venus .station-word-3d   { background: linear-gradient(135deg, #ffccbc, #ff6e40, #ffd54f); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-earth .station-word-3d   { background: linear-gradient(135deg, #80deea, #26c6da, #4dd0e1, #a5d6a7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-moon .station-word-3d    { background: linear-gradient(135deg, #e8eaf6, #c5cae9, #b0bec5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-mars .station-word-3d    { background: linear-gradient(135deg, #ef9a9a, #e57373, #c62828, #ff8a65); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-jupiter .station-word-3d { background: linear-gradient(135deg, #ffe082, #ffb300, #ff8f00, #c8a882); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-saturn .station-word-3d  { background: linear-gradient(135deg, #f5f5dc, #deb887, #c4a35a, #8b6914); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-uranus .station-word-3d  { background: linear-gradient(135deg, #b2dfdb, #4db6ac, #00897b, #80cbc4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-neptune .station-word-3d { background: linear-gradient(135deg, #90caf9, #42a5f5, #1565c0, #7986cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .dest-sun .station-word-3d     { background: linear-gradient(135deg, #fffde7, #fff176, #ffee58, #f9a825, #f57f17); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 30px rgba(249,168,37,0.6)); }
+
+  /* Planet visual orbs */
+  .planet-orb {
+    width: clamp(80px, 12vw, 160px);
+    height: clamp(80px, 12vw, 160px);
+    border-radius: 50%;
+    margin: 0 auto 2.5rem;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 1s ease 0.2s, transform 1.2s cubic-bezier(0.34,1.56,0.64,1) 0.2s;
+    position: relative;
+  }
+  .planet-orb.in-view { opacity: 1; transform: scale(1); }
+  .planet-orb::after {
+    content: '';
+    position: absolute;
+    inset: -30px;
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: planetGlow 3s ease-in-out infinite alternate;
+  }
+  @keyframes planetGlow {
+    0% { transform: scale(1); opacity: 0.15; }
+    100% { transform: scale(1.2); opacity: 0.35; }
+  }
+
+  .orb-mercury { background: radial-gradient(circle at 35% 35%, #ffe0b2, #c4a882 50%, #7d5a3c); }
+  .orb-mercury::after { background: radial-gradient(#c4a882, transparent); }
+  .orb-venus   { background: radial-gradient(circle at 35% 35%, #ffe09d, #e8a020 50%, #a87520); }
+  .orb-venus::after { background: radial-gradient(#ff6e40, transparent); }
+  .orb-earth   { background: radial-gradient(circle at 35% 35%, #89cff0, #1a75b8 50%, #0a3d5c); box-shadow: inset -30px -15px 40px rgba(0,0,80,0.6); }
+  .orb-earth::after { background: radial-gradient(#4fc3f7, transparent); }
+  .orb-moon    { background: radial-gradient(circle at 35% 35%, #f5f5f5, #b0b0b0 50%, #707070); }
+  .orb-moon::after { background: radial-gradient(#cfd8dc, transparent); }
+  .orb-mars    { background: radial-gradient(circle at 35% 35%, #ef9a9a, #c62828 50%, #6d1414); }
+  .orb-mars::after { background: radial-gradient(#e57373, transparent); }
+  .orb-jupiter { background: radial-gradient(circle at 35% 35%, #ffe082, #c8a030 50%, #7a5a10), repeating-linear-gradient(10deg, transparent, transparent 12px, rgba(139,90,43,0.3) 12px, rgba(139,90,43,0.3) 15px); }
+  .orb-jupiter::after { background: radial-gradient(#ffb300, transparent); }
+  .orb-saturn  {
+    background: radial-gradient(circle at 35% 35%, #f5deb3, #c8a060 50%, #8b6914);
+    box-shadow: -20px 0 0 -2px rgba(200,160,96,0.4), -40px 4px 0 -6px rgba(200,160,96,0.2), 20px -4px 0 -2px rgba(200,160,96,0.4), 40px -8px 0 -6px rgba(200,160,96,0.2);
+  }
+  .orb-saturn::after { background: radial-gradient(#deb887, transparent); }
+  .orb-uranus  { background: radial-gradient(circle at 35% 35%, #e0f7f4, #4db6ac 50%, #00695c); }
+  .orb-uranus::after { background: radial-gradient(#80cbc4, transparent); }
+  .orb-neptune { background: radial-gradient(circle at 35% 35%, #90caf9, #1565c0 50%, #0d2e5a); }
+  .orb-neptune::after { background: radial-gradient(#42a5f5, transparent); }
+  .orb-sun     { background: radial-gradient(circle at 40% 40%, #fff9c4, #fff176 30%, #ffeb3b 50%, #f9a825 70%, #e65100); animation: sunPulse 2s ease-in-out infinite alternate; }
+  .orb-sun::after { background: radial-gradient(#fff176, transparent); animation: sunGlow 2s ease-in-out infinite alternate; }
+  @keyframes sunPulse { 0% { box-shadow: 0 0 60px 20px rgba(255,235,59,0.6); } 100% { box-shadow: 0 0 120px 60px rgba(249,168,37,0.8); } }
+  @keyframes sunGlow  { 0% { opacity: 0.4; transform: scale(1.1); } 100% { opacity: 0.8; transform: scale(1.4); } }
+
+  /* === STELLA SECTION === */
+  #stella-message {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stella-card {
+    max-width: 800px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .stella-card::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, rgba(240,192,96,0.4), rgba(255,110,180,0.4), rgba(176,102,255,0.4), rgba(0,229,255,0.4));
+    z-index: -1;
+    animation: borderGlow 4s ease-in-out infinite;
+  }
+  @keyframes borderGlow {
+    0%,100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  .stella-inner {
+    background: rgba(5, 3, 20, 0.85);
+    backdrop-filter: blur(20px);
+    border-radius: 30px;
+    padding: 4rem 3rem;
+  }
+
+  .stella-eyebrow {
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: var(--rose);
+    opacity: 0.8;
+    margin-bottom: 2rem;
+  }
+
+  .stella-big-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(50px, 10vw, 110px);
+    font-weight: 900;
+    font-style: italic;
+    background: linear-gradient(135deg, #f0c060, #ff6eb4, #b066ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 40px rgba(255,110,180,0.3));
+  }
+
+  .stella-message-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(19px, 2.5vw, 26px);
+    font-style: italic;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 2.5rem;
+  }
+
+  .stella-quote {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 3.5vw, 38px);
+    font-style: italic;
+    color: #f0c060;
+    line-height: 1.5;
+    margin: 2rem 0;
+    position: relative;
+  }
+  .stella-quote::before { content: '"'; font-size: 3em; opacity: 0.2; position: absolute; top: -0.3em; left: -0.2em; line-height: 1; }
+  .stella-quote::after  { content: '"'; font-size: 3em; opacity: 0.2; position: absolute; bottom: -0.5em; right: -0.2em; line-height: 1; }
+
+  /* === CONSTELLATION SECTION === */
+  #constellation-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5rem 2rem;
+    position: relative;
+  }
+
+  .constellation-wrap {
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .section-eyebrow {
+    font-size: 11px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: rgba(240,192,96,0.5);
+    margin-bottom: 1rem;
+  }
+
+  .section-heading {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 700;
+    background: linear-gradient(135deg, #fff8e7, #f0c060 50%, #ff6eb4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4rem;
+  }
+
+  #constellation-svg {
+    width: 100%;
+    max-width: 700px;
+    height: 400px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  .star-node {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  .star-node:hover circle { r: 8; }
+  .star-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    fill: rgba(255,255,255,0.6);
+    font-size: 13px;
+    pointer-events: none;
+  }
+  .star-label.active { fill: #f0c060; }
+
+  /* === MEMORY JAR === */
+  #memories {
+    padding: 6rem 2rem;
+    position: relative;
+  }
+
+  .memories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .memory-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.4s ease;
+    opacity: 0;
+    transform: translateY(30px);
+    position: relative;
+    overflow: hidden;
+  }
+  .memory-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(240,192,96,0.5), transparent);
+  }
+  .memory-card.in-view { opacity: 1; transform: translateY(0); }
+  .memory-card:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(240,192,96,0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(240,192,96,0.1);
+  }
+
+  .memory-emoji { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+  .memory-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: #f0c060;
+    margin-bottom: 0.75rem;
+  }
+  .memory-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px;
+    font-style: italic;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.55);
+  }
+
+  /* === FOOTER === */
+  #footer {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .footer-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(36px, 6vw, 72px);
+    font-weight: 900;
+    font-style: italic;
+    background: linear-gradient(135deg, #b066ff, #ff6eb4, #f0c060);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1.5rem;
+  }
+
+  .footer-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(17px, 2.5vw, 24px);
+    font-style: italic;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 3rem;
+  }
+
+  .footer-stella {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(80px, 15vw, 180px);
+    font-weight: 900;
+    font-style: italic;
+    background: linear-gradient(135deg, rgba(240,192,96,0.1), rgba(255,110,180,0.15), rgba(176,102,255,0.1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    letter-spacing: -2px;
+    user-select: none;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 2;
+    opacity: 0;
+    animation: particleFloat linear infinite;
+  }
+  @keyframes particleFloat {
+    0%   { opacity: 0; transform: translateY(0) rotate(0deg); }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.8; }
+    100% { opacity: 0; transform: translateY(-100vh) rotate(360deg); }
+  }
+
+  /* Shooting stars */
+  .shooting-star {
+    position: fixed;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(255,255,255,0), rgba(255,255,255,0.8), rgba(255,255,255,0));
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+
+<!-- Galaxy Canvas -->
+<canvas id="galaxy-canvas"></canvas>
+
+<!-- SVG Nebula -->
+<svg class="nebula-layer" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <radialGradient id="neb1" cx="30%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="rgba(176,102,255,0.12)"/>
+      <stop offset="100%" stop-color="rgba(176,102,255,0)"/>
+    </radialGradient>
+    <radialGradient id="neb2" cx="75%" cy="30%" r="45%">
+      <stop offset="0%" stop-color="rgba(255,110,180,0.10)"/>
+      <stop offset="100%" stop-color="rgba(255,110,180,0)"/>
+    </radialGradient>
+    <radialGradient id="neb3" cx="60%" cy="75%" r="55%">
+      <stop offset="0%" stop-color="rgba(0,229,255,0.08)"/>
+      <stop offset="100%" stop-color="rgba(0,229,255,0)"/>
+    </radialGradient>
+    <radialGradient id="neb4" cx="20%" cy="70%" r="40%">
+      <stop offset="0%" stop-color="rgba(240,192,96,0.07)"/>
+      <stop offset="100%" stop-color="rgba(240,192,96,0)"/>
+    </radialGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#neb1)"/>
+  <rect width="100%" height="100%" fill="url(#neb2)"/>
+  <rect width="100%" height="100%" fill="url(#neb3)"/>
+  <rect width="100%" height="100%" fill="url(#neb4)"/>
+</svg>
+
+<!-- MAIN CONTENT -->
+<div id="main-wrap">
+
+  <!-- HERO -->
+  <section id="hero">
+    <!-- Orbit rings -->
+    <div class="hero-orbit-ring" style="width:350px;height:350px;position:absolute;top:50%;left:50%;animation-duration:20s;">
+      <div class="orbit-dot" style="color:#f0c060;background:#f0c060;"></div>
+    </div>
+    <div class="hero-orbit-ring" style="width:500px;height:500px;position:absolute;top:50%;left:50%;animation-duration:35s;animation-direction:reverse;border-color:rgba(255,110,180,0.12);">
+      <div class="orbit-dot" style="color:#ff6eb4;background:#ff6eb4;width:6px;height:6px;"></div>
+    </div>
+    <div class="hero-orbit-ring" style="width:700px;height:700px;position:absolute;top:50%;left:50%;animation-duration:55s;border-color:rgba(176,102,255,0.08);">
+      <div class="orbit-dot" style="color:#b066ff;background:#b066ff;width:5px;height:5px;"></div>
+    </div>
+
+    <p class="hero-tagline">✦ A cosmic journey through friendship ✦</p>
+    <h1 class="hero-title">Stella</h1>
+    <p class="hero-subtitle">where every star in the universe knows your name</p>
+
+    <div class="hero-cta">
+      <a href="#journey" class="btn-stardust">Begin the Journey</a>
+      <a href="#stella-message" class="btn-void">For Stella</a>
+    </div>
+
+    <div class="scroll-hint">
+      <span>Scroll to travel</span>
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+  <!-- JOURNEY — 3D SCROLL WORDS -->
+  <section id="journey">
+
+    <!-- Mercury -->
+    <div class="journey-station dest-mercury" data-dest="mercury">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(196,168,130,0.6)">☿ Mercury · First Stop</p>
+        <div class="planet-orb orb-mercury"></div>
+        <span class="station-word-3d">Loyalty</span>
+        <p class="station-desc">The swift messenger of the gods carries a truth about you — your loyalty is swifter than light itself, reaching people before they even know they need you.</p>
+        <p class="station-poem">
+          You showed up first<br>
+          when no one expected anyone,<br>
+          that is the whole poem.
+        </p>
+      </div>
+    </div>
+
+    <!-- Venus -->
+    <div class="journey-station dest-venus" data-dest="venus">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(255,110,64,0.6)">♀ Venus · Second Stop</p>
+        <div class="planet-orb orb-venus"></div>
+        <span class="station-word-3d">Warmth</span>
+        <p class="station-desc">Venus burns slow and golden. Like you — your warmth is not a flash, it is a steady ember that makes every room feel like coming home after a long, long journey.</p>
+        <p class="station-poem">
+          The way you laugh<br>
+          makes everything feel<br>
+          less impossible.
+        </p>
+      </div>
+    </div>
+
+    <!-- Earth -->
+    <div class="journey-station dest-earth" data-dest="earth">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(77,195,225,0.6)">🌍 Earth · Third Stop</p>
+        <div class="planet-orb orb-earth"></div>
+        <span class="station-word-3d">Home</span>
+        <p class="station-desc">Out of every world spinning in the infinite dark, this one bloomed with oceans and songs and your laughter — proof that the universe saves its most beautiful things for here.</p>
+        <p class="station-poem">
+          Home is not a place.<br>
+          It is the feeling I get<br>
+          when you pick up the phone.
+        </p>
+      </div>
+    </div>
+
+    <!-- Moon -->
+    <div class="journey-station dest-moon" data-dest="moon">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(176,188,197,0.6)">☽ The Moon · A Pause</p>
+        <div class="planet-orb orb-moon"></div>
+        <span class="station-word-3d">Grace</span>
+        <p class="station-desc">The Moon has no light of its own — it only reflects the Sun. But oh, how it shines. Stella, you take the light around you and make everyone see the night differently.</p>
+        <p class="station-poem">
+          Quiet but radiant,<br>
+          you move the ocean<br>
+          without even trying.
+        </p>
+      </div>
+    </div>
+
+    <!-- Mars -->
+    <div class="journey-station dest-mars" data-dest="mars">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(229,115,115,0.6)">♂ Mars · Fourth Stop</p>
+        <div class="planet-orb orb-mars"></div>
+        <span class="station-word-3d">Courage</span>
+        <p class="station-desc">Rust-red and fierce — Mars knows what it means to weather storms. You carry a quiet bravery that looks like softness from a distance, but moves mountains up close.</p>
+        <p class="station-poem">
+          You walk through fire<br>
+          and come out<br>
+          smelling like wildflowers.
+        </p>
+      </div>
+    </div>
+
+    <!-- Jupiter -->
+    <div class="journey-station dest-jupiter" data-dest="jupiter">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(255,179,0,0.6)">♃ Jupiter · Fifth Stop</p>
+        <div class="planet-orb orb-jupiter"></div>
+        <span class="station-word-3d">Radiance</span>
+        <p class="station-desc">Jupiter is the largest storm in the solar system — but it is also the planet that protects. It catches the asteroids before they reach us. You have always done the same for the people you love.</p>
+        <p class="station-poem">
+          Great enough to shield,<br>
+          bright enough to guide,<br>
+          yours is the biggest heart.
+        </p>
+      </div>
+    </div>
+
+    <!-- Saturn -->
+    <div class="journey-station dest-saturn" data-dest="saturn">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(200,160,96,0.6)">♄ Saturn · Sixth Stop</p>
+        <div class="planet-orb orb-saturn"></div>
+        <span class="station-word-3d">Beauty</span>
+        <p class="station-desc">Saturn wears its rings like a crown — not out of vanity but because the universe simply couldn't help itself. Beauty like yours doesn't ask for attention. It simply is.</p>
+        <p class="station-poem">
+          The rings were made<br>
+          from a thousand broken things<br>
+          and look how stunning.
+        </p>
+      </div>
+    </div>
+
+    <!-- Uranus -->
+    <div class="journey-station dest-uranus" data-dest="uranus">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(77,182,172,0.6)">⛢ Uranus · Seventh Stop</p>
+        <div class="planet-orb orb-uranus"></div>
+        <span class="station-word-3d">Freedom</span>
+        <p class="station-desc">Uranus spins on its side — tilted, unique, unapologetically itself. You have always been exactly yourself in a world that pressures everyone to conform. That is not a flaw. That is your superpower.</p>
+        <p class="station-poem">
+          Tilted and magnificent,<br>
+          you orbit at your own angle<br>
+          and the universe approves.
+        </p>
+      </div>
+    </div>
+
+    <!-- Neptune -->
+    <div class="journey-station dest-neptune" data-dest="neptune">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(66,165,245,0.6)">♆ Neptune · Eighth Stop</p>
+        <div class="planet-orb orb-neptune"></div>
+        <span class="station-word-3d">Mystery</span>
+        <p class="station-desc">The farthest known planet, bluer than anything — Neptune holds secrets the rest of the solar system has never seen. You have depths in you that would take a lifetime to explore, and what a beautiful lifetime that would be.</p>
+        <p class="station-poem">
+          Deep blue, far away,<br>
+          you hold oceans in you<br>
+          that no one has mapped yet.
+        </p>
+      </div>
+    </div>
+
+    <!-- The Sun -->
+    <div class="journey-station dest-sun" data-dest="sun">
+      <div class="station-inner">
+        <p class="planet-label" style="color:rgba(255,235,59,0.7)">☀ The Sun · Final Destination</p>
+        <div class="planet-orb orb-sun" style="width:clamp(100px,16vw,200px);height:clamp(100px,16vw,200px);"></div>
+        <span class="station-word-3d">Stella</span>
+        <p class="station-desc">Every journey through the cosmos leads here — to the star at the center of everything. Stella. Your name means star. And that is not a metaphor. That is the truth the universe wrote before you were born.</p>
+        <p class="station-poem">
+          They named you star<br>
+          because the night sky needed<br>
+          a word for what you are.
+        </p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- STELLA MESSAGE -->
+  <section id="stella-message">
+    <div class="stella-card">
+      <div class="stella-inner">
+        <p class="stella-eyebrow">✦ A letter from the cosmos ✦</p>
+        <h2 class="stella-big-name">For Stella</h2>
+        <p class="stella-message-text">
+          Somewhere between Mercury and the Sun, between the first hello and the thousandth laugh,
+          a friendship was forged from the same stardust that built galaxies.
+          The universe is 13.8 billion years old and it took every single second of that time
+          to arrange the atoms, the moments, the people — just to bring you here.
+        </p>
+        <p class="stella-quote">You are not a person in the universe. You are the universe in a person — vast, luminous, and endlessly becoming.</p>
+        <p class="stella-message-text">
+          This page exists because some things are too beautiful to exist only in memory.
+          You are one of those things.
+          Thank you for being my friend.
+          Thank you for being exactly, magnificently, irreplaceably you.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONSTELLATION -->
+  <section id="constellation-section">
+    <div class="constellation-wrap">
+      <p class="section-eyebrow">✦ The Stella Constellation ✦</p>
+      <h2 class="section-heading">The Stars That Define You</h2>
+      <svg id="constellation-svg" viewBox="0 0 700 400">
+        <defs>
+          <filter id="starGlow">
+            <feGaussianBlur stdDeviation="3" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+        <!-- Connection lines -->
+        <g stroke="rgba(240,192,96,0.15)" stroke-width="1" fill="none" id="const-lines"></g>
+        <!-- Stars filled by JS -->
+        <g id="const-stars"></g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- MEMORIES -->
+  <section id="memories">
+    <div style="max-width:1000px;margin:0 auto;text-align:center;margin-bottom:3rem;">
+      <p class="section-eyebrow">✦ A Universe of Moments ✦</p>
+      <h2 class="section-heading">What Friendship Looks Like in Outer Space</h2>
+    </div>
+    <div class="memories-grid">
+      <div class="memory-card">
+        <span class="memory-emoji">🌙</span>
+        <h3 class="memory-title">Midnight Conversations</h3>
+        <p class="memory-text">The kind that start at 11pm and somehow end at sunrise, when you've solved everything and laughed at everything and the world feels manageable again.</p>
+      </div>
+      <div class="memory-card">
+        <span class="memory-emoji">✨</span>
+        <h3 class="memory-title">The Silences</h3>
+        <p class="memory-text">The comfortable ones. The rare kind where you don't need words because being in the same orbit is already the whole conversation.</p>
+      </div>
+      <div class="memory-card">
+        <span class="memory-emoji">🪐</span>
+        <h3 class="memory-title">The Adventures</h3>
+        <p class="memory-text">Every place you went, every ridiculous idea you said yes to, every moment you turned an ordinary Tuesday into something worth writing about.</p>
+      </div>
+      <div class="memory-card">
+        <span class="memory-emoji">💫</span>
+        <h3 class="memory-title">The Hard Days</h3>
+        <p class="memory-text">The days when the universe felt heavy and you were simply there — no fixing, no solving. Just there. That is rarer and more precious than you know.</p>
+      </div>
+      <div class="memory-card">
+        <span class="memory-emoji">🌟</span>
+        <h3 class="memory-title">Your Laugh</h3>
+        <p class="memory-text">The one that takes over your whole body. The one that is absolutely contagious. The one that makes strangers turn and smile without knowing why.</p>
+      </div>
+      <div class="memory-card">
+        <span class="memory-emoji">🌌</span>
+        <h3 class="memory-title">Growing Together</h3>
+        <p class="memory-text">Two stars in the same galaxy — sometimes close, sometimes distant, but always orbiting the same truth: this friendship is for keeps, across every universe.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <section id="footer">
+    <div>
+      <p class="footer-title">Ad astra, Stella.</p>
+      <p class="footer-sub">To the stars — because that is exactly where you belong.</p>
+      <p class="footer-stella">Stella</p>
+      <p style="font-family:'Space Grotesk';font-size:11px;letter-spacing:4px;color:rgba(255,255,255,0.2);text-transform:uppercase;margin-top:3rem;">Made with love · from one star to another · ✦</p>
+    </div>
+  </section>
+
+</div><!-- end main-wrap -->
+
+<script>
+// ==================== CURSOR ====================
+const cur = document.getElementById('cursor');
+const trail = document.getElementById('cursor-trail');
+let mx=0,my=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx+'px'; cur.style.top = my+'px';
+  setTimeout(()=>{ trail.style.left=mx+'px'; trail.style.top=my+'px'; },80);
+});
+
+// ==================== GALAXY CANVAS ====================
+const canvas = document.getElementById('galaxy-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, stars=[], nebStars=[];
+
+function resize(){
+  W=canvas.width=window.innerWidth;
+  H=canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+function mkStars(){
+  stars=[];
+  for(let i=0;i<800;i++){
+    stars.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.5+0.2,
+      a: Math.random(), da: (Math.random()-0.5)*0.003,
+      color: ['#ffffff','#fff8e7','#f0c060','#ff6eb4','#b066ff','#00e5ff'][Math.floor(Math.random()*6)]
+    });
+  }
+}
+mkStars();
+window.addEventListener('resize', mkStars);
+
+// Milky Way band stars
+for(let i=0;i<300;i++){
+  nebStars.push({
+    x: Math.random()*W,
+    y: H*0.3 + (Math.random()-0.5)*H*0.5,
+    r: Math.random()*0.8+0.1,
+    a: Math.random()*0.4+0.05
+  });
+}
+
+let shooters=[];
+function spawnShooter(){
+  const angle = -30 + Math.random()*20;
+  const startX = Math.random()*W;
+  const startY = Math.random()*H*0.5;
+  shooters.push({ x:startX, y:startY, len: 80+Math.random()*120, angle, speed: 8+Math.random()*6, a:1, done:false });
+}
+setInterval(spawnShooter, 3000+Math.random()*4000);
+
+function drawGalaxy(ts){
+  ctx.clearRect(0,0,W,H);
+
+  // Draw milky way fog
+  const grd = ctx.createLinearGradient(0,H*0.25,W,H*0.7);
+  grd.addColorStop(0,'rgba(80,40,120,0.0)');
+  grd.addColorStop(0.3,'rgba(80,40,120,0.04)');
+  grd.addColorStop(0.5,'rgba(120,60,160,0.06)');
+  grd.addColorStop(0.7,'rgba(80,40,120,0.04)');
+  grd.addColorStop(1,'rgba(80,40,120,0.0)');
+  ctx.fillStyle=grd; ctx.fillRect(0,0,W,H);
+
+  // Nebula stars
+  nebStars.forEach(s=>{
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle=`rgba(180,150,230,${s.a})`;
+    ctx.fill();
+  });
+
+  // Main stars
+  stars.forEach(s=>{
+    s.a+=s.da;
+    if(s.a>1||s.a<0.1) s.da*=-1;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+    ctx.fillStyle = s.color;
+    ctx.globalAlpha = s.a;
+    if(s.r>1){
+      ctx.shadowBlur=4; ctx.shadowColor=s.color;
+    }
+    ctx.fill();
+    ctx.shadowBlur=0;
+    ctx.globalAlpha=1;
+  });
+
+  // Shooting stars
+  shooters.forEach((s,i)=>{
+    if(s.done) return;
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.angle*Math.PI/180);
+    const g = ctx.createLinearGradient(0,0,s.len,0);
+    g.addColorStop(0,'rgba(255,255,255,0)');
+    g.addColorStop(1,`rgba(255,255,255,${s.a})`);
+    ctx.strokeStyle=g; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(s.len,0); ctx.stroke();
+    ctx.restore();
+    s.x+=s.speed*Math.cos(s.angle*Math.PI/180);
+    s.y+=s.speed*Math.sin(s.angle*Math.PI/180);
+    s.a-=0.015;
+    if(s.a<=0) s.done=true;
+  });
+  shooters=shooters.filter(s=>!s.done);
+
+  requestAnimationFrame(drawGalaxy);
+}
+requestAnimationFrame(drawGalaxy);
+
+// ==================== FLOATING PARTICLES ====================
+function spawnParticle(){
+  const el=document.createElement('div');
+  el.className='particle';
+  const size=Math.random()*4+1;
+  const colors=['#f0c060','#ff6eb4','#b066ff','#00e5ff','#ffffff'];
+  el.style.cssText=`
+    width:${size}px;height:${size}px;
+    left:${Math.random()*100}vw;
+    bottom:${-size}px;
+    background:${colors[Math.floor(Math.random()*colors.length)]};
+    animation-duration:${8+Math.random()*12}s;
+    animation-delay:${Math.random()*5}s;
+    box-shadow:0 0 ${size*3}px ${colors[Math.floor(Math.random()*colors.length)]};
+  `;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 25000);
+}
+setInterval(spawnParticle, 400);
+
+// ==================== SCROLL ANIMATIONS ====================
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    const el = entry.target;
+    if(entry.isIntersecting){
+      el.classList.add('in-view');
+      el.classList.remove('past-view');
+    } else {
+      if(entry.boundingClientRect.top < 0){
+        el.classList.add('past-view');
+        el.classList.remove('in-view');
+      } else {
+        el.classList.remove('in-view');
+      }
+    }
+  });
+},{threshold:0.3});
+
+document.querySelectorAll('.station-word-3d, .station-desc, .station-poem, .planet-orb, .memory-card').forEach(el=>io.observe(el));
+
+// Memory card stagger
+document.querySelectorAll('.memory-card').forEach((c,i)=>{
+  c.style.transitionDelay = (i*0.1)+'s';
+});
+
+// ==================== CONSTELLATION ====================
+const constellationStars = [
+  {x:350,y:80, label:'Joy', r:7},
+  {x:180,y:130, label:'Kindness', r:5},
+  {x:520,y:140, label:'Laughter', r:6},
+  {x:100,y:240, label:'Wisdom', r:5},
+  {x:280,y:200, label:'Courage', r:6},
+  {x:430,y:210, label:'Love', r:8},
+  {x:600,y:220, label:'Light', r:5},
+  {x:160,y:320, label:'Truth', r:5},
+  {x:350,y:290, label:'Grace', r:7},
+  {x:540,y:310, label:'Wonder', r:6},
+  {x:250,y:370, label:'Hope', r:5},
+  {x:480,y:370, label:'Magic', r:6},
+];
+const connections=[
+  [0,1],[0,2],[1,3],[1,4],[2,4],[2,5],[2,6],[4,8],[5,8],[3,7],[7,10],[8,10],[8,11],[5,9],[6,9],[9,11]
+];
+
+const linesG = document.getElementById('const-lines');
+const starsG  = document.getElementById('const-stars');
+connections.forEach(([a,b])=>{
+  const sa=constellationStars[a], sb=constellationStars[b];
+  const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1',sa.x); line.setAttribute('y1',sa.y);
+  line.setAttribute('x2',sb.x); line.setAttribute('y2',sb.y);
+  linesG.appendChild(line);
+});
+
+constellationStars.forEach((s,i)=>{
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.classList.add('star-node');
+  g.setAttribute('filter','url(#starGlow)');
+
+  const outer=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  outer.setAttribute('cx',s.x); outer.setAttribute('cy',s.y);
+  outer.setAttribute('r',s.r+6); outer.setAttribute('fill','rgba(240,192,96,0.1)');
+  g.appendChild(outer);
+
+  const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('cx',s.x); c.setAttribute('cy',s.y); c.setAttribute('r',s.r);
+  c.setAttribute('fill','#f0c060');
+  const anim=document.createElementNS('http://www.w3.org/2000/svg','animate');
+  anim.setAttribute('attributeName','r');
+  anim.setAttribute('values',`${s.r};${s.r*1.5};${s.r}`);
+  anim.setAttribute('dur',`${2+Math.random()*2}s`);
+  anim.setAttribute('repeatCount','indefinite');
+  c.appendChild(anim);
+  g.appendChild(c);
+
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',s.x); t.setAttribute('y',s.y+s.r+16);
+  t.setAttribute('text-anchor','middle');
+  t.classList.add('star-label');
+  t.textContent=s.label;
+  g.appendChild(t);
+
+  g.addEventListener('mouseenter',()=>{
+    c.setAttribute('fill','#ff6eb4');
+    outer.setAttribute('fill','rgba(255,110,180,0.2)');
+    t.classList.add('active');
+  });
+  g.addEventListener('mouseleave',()=>{
+    c.setAttribute('fill','#f0c060');
+    outer.setAttribute('fill','rgba(240,192,96,0.1)');
+    t.classList.remove('active');
+  });
+
+  starsG.appendChild(g);
+});
+
+// ==================== PARALLAX ====================
+let scrollY=0;
+window.addEventListener('scroll',()=>{
+  scrollY=window.scrollY;
+  document.querySelectorAll('.hero-orbit-ring').forEach((r,i)=>{
+    r.style.transform=`translate(-50%,-50%) translateY(${scrollY*(0.1+i*0.05)}px)`;
+  });
+});
+
+console.log("✦ Made with love for Stella ✦");
+</script>
+</body>
+</html>
